@@ -1,4 +1,5 @@
 final int DIMENSIONS = 3;
+final int DIMENSIONS_CAMERA = DIMENSIONS - 1;
 
 final float CAMERA_WIDTH = 1000;
 final float CAMERA_HEIGHT = 800;
@@ -11,6 +12,7 @@ final ArrayList<float[]> vertices = new ArrayList<float[]>();
 
 //The top-left corner of the camera, in the z plane:
 final float[] camera_corner = {0, 0, 0};
+final float[] camera_size = {CAMERA_WIDTH, CAMERA_HEIGHT};
 
 //z distance of focus point behind the camera plane:
 float focal_length = 100; 
@@ -135,13 +137,14 @@ void draw() {
   float[] previous_point = null;
   //println(" z=" + focus_point[2]);
   
-   
+  //The focal point:
   final float[] real_focus = new float[DIMENSIONS];
-  real_focus[0] = camera_corner[0] + (CAMERA_WIDTH / 2);
-  real_focus[1] = camera_corner[1] + (CAMERA_HEIGHT / 2);
-  final float camera_z = camera_corner[2];
+  for (int i = 0 ; i < DIMENSIONS_CAMERA; ++i) { 
+    real_focus[i] = camera_corner[i] + (camera_size[i] / 2);
+  }
+  final float camera_z = camera_corner[DIMENSIONS - 1];
   final float real_focus_z = camera_z - focal_length;
-  real_focus[2] = real_focus_z;
+  real_focus[DIMENSIONS - 1] = real_focus_z;
   
   for (float[] vertex : vertices) {
     //Calculate the length of the straight line from the vertex to the focus point,
@@ -156,27 +159,20 @@ void draw() {
       
     //final float screen_intersection_to_focus_length = vertex_to_focus_length * ratio_z;
      
-    final float vertex_x = vertex[0];
-    final float focus_x = real_focus[0];
-    final float projected_x = focus_x + (vertex_x - focus_x) * ratio_z;
-    float camera_x = projected_x - camera_corner[0];
-    //println("vertex_x: " + vertex_x + ", focus_x:" + focus_x + ", projected_x:" + projected_x  + ", camera_x:" + camera_x);
-     
-    final float vertex_y = vertex[1];
-    final float focus_y = real_focus[1];
-    final float projected_y = focus_y + (vertex_y - focus_y) * ratio_z;
-    float camera_y = projected_y - camera_corner[1];
-     
-    //Move to center of screen:
-    //camera_x += CAMERA_WIDTH / (float)2;
-    //camera_y += CAMERA_HEIGHT / (float)2;
+    final float[] camera_points = new float[DIMENSIONS_CAMERA];
+    for (int i = 0 ; i < DIMENSIONS_CAMERA; ++i) {
+      final float vertex_pos = vertex[i];
+      final float focus_pos = real_focus[i];
+      final float projected_pos = focus_pos + (vertex_pos - focus_pos) * ratio_z;
+      camera_points[i] = projected_pos - camera_corner[i];
+    }
     
     if (previous_point != null) {
       line(previous_point[0], previous_point[1],
-        camera_x, camera_y);
+        camera_points[0], camera_points[1]);
     }
   
-    previous_point = new float[] {camera_x, camera_y};
+    previous_point = new float[] {camera_points[0], camera_points[1]};
   }
 }
 
