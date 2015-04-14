@@ -7,6 +7,8 @@ final float CAMERA_HEIGHT = 800;
 // Vertices of a cube: x, y, z
 final float EDGE_LENGTH = 200;
 
+final double MOVE_STEP = 5;
+
 
 final ArrayList<float[]> vertices = new ArrayList<float[]>();
 
@@ -27,7 +29,7 @@ float[] newVertex(float[] offset) {
 /**
  * Add opposite squares (cube sides) in the plane of this dimension.
  */
-void add_cube_sides(final float[] offset, int dimension)
+void add_cube_sides(final ArrayList<float[]> vertices, final float[] offset, final float edge_length, final int dimension)
 {
   //For instance, draw with x and y values if we are drawing on the z plane:
   int dimension1 = dimension + 1;
@@ -41,13 +43,11 @@ void add_cube_sides(final float[] offset, int dimension)
   }
   
   //println("dimension=" + dimension + ", dimension1=" + dimension1 + ", dimension2=" + dimension2);
-
-  final float HALF_LENGTH = EDGE_LENGTH / 2;
   
   for (int i = 0; i < 2; ++i) {
     final float[] offsetSide = new float[DIMENSIONS];
     arrayCopy(offset, offsetSide);
-    final float OFFSET_FROM_PLANE = i * EDGE_LENGTH;;
+    final float OFFSET_FROM_PLANE = i * edge_length;
     offsetSide[dimension] += OFFSET_FROM_PLANE;
     
     float[] vertex = newVertex(offsetSide);
@@ -56,18 +56,18 @@ void add_cube_sides(final float[] offset, int dimension)
     vertices.add(vertex);
   
     vertex = newVertex(offsetSide);
-    vertex[dimension1] += EDGE_LENGTH;
+    vertex[dimension1] += edge_length;
     vertex[dimension2] += 0;
     vertices.add(vertex);
      
     vertex = newVertex(offsetSide);
-    vertex[dimension1] += EDGE_LENGTH;
-    vertex[dimension2] += EDGE_LENGTH;
+    vertex[dimension1] += edge_length;
+    vertex[dimension2] += edge_length;
     vertices.add(vertex);
      
     vertex = newVertex(offsetSide);
     vertex[dimension1] += 0;
-    vertex[dimension2] += EDGE_LENGTH;
+    vertex[dimension2] += edge_length;
     vertices.add(vertex);
      
     vertex = newVertex(offsetSide);
@@ -77,9 +77,9 @@ void add_cube_sides(final float[] offset, int dimension)
   }
 }
 
-void add_cube_sides(final float[] offset) {
+void add_cube_sides(final ArrayList<float[]> vertices, final float[] offset, final float edge_length) {
   for (int dimension = 0; dimension < DIMENSIONS; ++dimension) {
-    add_cube_sides(offset, dimension);
+    add_cube_sides(vertices, offset, edge_length, dimension);
   }
 }
   
@@ -87,10 +87,9 @@ void setup() {
   size((int)CAMERA_WIDTH, (int)CAMERA_HEIGHT);
   noSmooth();
  
-  add_cube_sides(OFFSET);
+  add_cube_sides(vertices, OFFSET, EDGE_SIZE);
 }
 
-final double MOVE_STEP = 5;
 void keyPressed()
 { 
   //Use the arrow keys to move our focus point (where we are standing)
