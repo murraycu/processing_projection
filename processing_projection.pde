@@ -35,6 +35,42 @@ float[] newVertex(final int dimensions) {
   return result;
 }
 
+void addAxesLines(final ArrayList<VerticesSet> sets, final float[] offset, final int dimensions) {
+  final float MIN = -1000;
+  final float MAX = 1000;
+  for(int i = 0; i < dimensions; ++i) {
+    final VerticesSet set = new VerticesSet();
+    addAxisLine(set.vertices, offset, dimensions, i);
+    set.drawingColor = color(50, 55, 100);
+    sets.add(set);
+  }
+}
+  
+void addAxisLine(final ArrayList<float[]> vertices, final float[] offset, final int dimensions, final int dimension) {
+  final float RANGE = 1000;
+  
+  float[] vertex = newVertex(offset, dimensions);
+  vertex[dimension] -= RANGE;
+  vertices.add(vertex);
+    
+  vertex = newVertex(offset, dimensions);
+  vertex[dimension] += RANGE;
+  vertices.add(vertex);
+}
+
+void addQuadraticPlot(final ArrayList<float[]> vertices, final float[] offset, final int dimensions) {
+  final float MIN = -100;
+  final float MAX = 100;
+  for(float x = MIN; x <= MAX; x += 1) {
+    final float y = 5 * pow(x, 2) + 30 * x;
+  
+    final float[] vertex = newVertex(offset, dimensions);
+    vertex[0] += x;
+    vertex[1] += y;
+    vertices.add(vertex);
+  }
+}
+
 /**
  * Add opposite squares (cube sides) in the plane of this dimension.
  */
@@ -102,6 +138,15 @@ void setup() {
 
   noSmooth();
   
+  final float[] offset = {CAMERA_SIZE / 2 - (EDGE_LENGTH / 2), CAMERA_SIZE / 2 - (EDGE_LENGTH / 2), 300};
+  addAxesLines(sets, offset, DIMENSIONS);
+  
+  VerticesSet set = new VerticesSet();
+  addQuadraticPlot(set.vertices, offset, DIMENSIONS);
+  set.drawingColor = color(204, 153, 0);
+  sets.add(set);
+  
+  /*
   VerticesSet set = new VerticesSet();
   final float[] offset1 = {CAMERA_SIZE / 2 - (EDGE_LENGTH / 2), CAMERA_SIZE / 2 - (EDGE_LENGTH / 2), 300};
   addCube(set.vertices, offset1, DIMENSIONS, EDGE_LENGTH);
@@ -113,6 +158,7 @@ void setup() {
   addCube(set.vertices, offset2, DIMENSIONS, 250);
   set.drawingColor = color(50, 55, 100);
   sets.add(set);
+  */
 }
 
 void keyPressed()
