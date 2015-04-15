@@ -38,50 +38,51 @@ float[] newVertex(final int dimensions) {
  * Add opposite squares (cube sides) in the plane of this dimension.
  */
 void addCubeSides(final ArrayList<float[]> vertices, final float[] offset, final int dimensions, final float edgeLength, final int dimension)
-{
-  //For instance, draw with x and y values if we are drawing on the z plane:
-  int dimension1 = dimension + 1;
-  if (dimension1 >= dimensions) {
-    dimension1 = 0;
-  }
-    
-  int dimension2 = dimension1 + 1;
-  if (dimension2 >= dimensions) {
-    dimension2 = 0;
-  }
-  
+{  
   //println("dimension=" + dimension + ", dimension1=" + dimension1 + ", dimension2=" + dimension2);
-  
+
   for (int i = 0; i < 2; ++i) {
+    //println("Side:");
     final float[] offsetSide = new float[DIMENSIONS];
     arrayCopy(offset, offsetSide);
     final float OFFSET_FROM_PLANE = i * edgeLength;
     offsetSide[dimension] += OFFSET_FROM_PLANE;
-    
+
+    //Generate a series of vertices, adding the edge length to each dimension in turn:
     float[] vertex = newVertex(offsetSide, dimensions);
-    vertex[dimension1] += 0;
-    vertex[dimension2] += 0;
-    vertices.add(vertex);
-  
-    vertex = newVertex(offsetSide, dimensions);
-    vertex[dimension1] += edgeLength;
-    vertex[dimension2] += 0;
-    vertices.add(vertex);
-     
-    vertex = newVertex(offsetSide, dimensions);
-    vertex[dimension1] += edgeLength;
-    vertex[dimension2] += edgeLength;
-    vertices.add(vertex);
-     
-    vertex = newVertex(offsetSide, dimensions);
-    vertex[dimension1] += 0;
-    vertex[dimension2] += edgeLength;
-    vertices.add(vertex);
-     
-    vertex = newVertex(offsetSide, dimensions);
-    vertex[dimension1] += 0;
-    vertex[dimension2] += 0;
-    vertices.add(vertex);
+    float[] vertexStart = null;
+    for (int j = 0; j < dimensions; ++j) {
+      if (j == dimension) {
+        continue;
+      }
+
+      vertex[j] += edgeLength;
+
+      final float[] v = newVertex(vertex, dimensions);
+      vertices.add(v);
+      //println("  vertex: " + v[0] + ", " + v[1] + ", " + v[2]);
+
+      if (vertexStart == null) {
+        vertexStart = newVertex(v, dimensions);
+      }
+    }
+
+    //Generate a series of vertices, removing the edge length from each dimension in turn:
+    for (int j = 0; j < dimensions; ++j) {
+      if (j == dimension) {
+        continue;
+      }
+
+      vertex[j] -= edgeLength;
+
+      float[] v = newVertex(vertex, dimensions);
+      vertices.add(v);
+      //println("  vertex: " + v[0] + ", " + v[1] + ", " + v[2]);
+    }
+
+    //And back to the start:
+    vertices.add(vertexStart);
+    //println("  vertexStart: " + vertexStart[0] + ", " + vertexStart[1] + ", " + vertexStart[2]);
   }
 }
 
