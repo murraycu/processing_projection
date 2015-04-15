@@ -17,7 +17,7 @@ final float[] camera_corner = {0, 0, 0};
 final float[] camera_size = {CAMERA_WIDTH, CAMERA_HEIGHT};
 
 //z distance of focus point behind the camera plane:
-float focal_length = 100; 
+float focal_length = 500; 
 
 final float[] OFFSET = {CAMERA_WIDTH / 2 - (EDGE_LENGTH / 2), CAMERA_HEIGHT / 2 - (EDGE_LENGTH / 2), 300};
 
