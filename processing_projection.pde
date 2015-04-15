@@ -146,18 +146,12 @@ void draw() {
   real_focus[DIMENSIONS - 1] = real_focus_z;
   
   for (float[] vertex : vertices) {
-    //Calculate the length of the straight line from the vertex to the focus point,
-    //using pythagoras' theorem (a^2 + b^2 = c^2) extended to n dimensions:
-    //final float vertex_to_focus_length = calc_side_length(vertex, real_focus);
-  
     //Calculate the ratio of the z from the focus-point-to-camera to focus-point-to-vertex:
     //TODO: Avoid division by zero:
     final float ratio_z = (camera_z - real_focus_z) /
       (vertex[DIMENSIONS - 1] - real_focus_z);
     //println("ratio_z: " + ratio_z);
-      
-    //final float screen_intersection_to_focus_length = vertex_to_focus_length * ratio_z;
-     
+    
     final float[] camera_points = new float[DIMENSIONS_CAMERA];
     for (int i = 0 ; i < DIMENSIONS_CAMERA; ++i) {
       final float vertex_pos = vertex[i];
@@ -174,21 +168,6 @@ void draw() {
     previous_point = new float[] {camera_points[0], camera_points[1]};
   }
 }
-
-/**
- * Calculate the length of the straight line from vertex a to vertex b
- * using pythagorus' theorem (a^2 + b^2 = c^2) extended to n dimensions.
- **/
-float calc_side_length(final float[] a, final float[] b) {
-  float product_of_squares = 0;
-  for (int i = 0; i < DIMENSIONS; ++i) {
-    final float length = a[i] - b[i];
-    product_of_squares += pow(length, 2);
-  }
-  
-  return sqrt(product_of_squares);
-}
-
 
 
 
