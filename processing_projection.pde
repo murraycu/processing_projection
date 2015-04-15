@@ -177,10 +177,10 @@ ArrayList<VerticesSet> projectToPlane(final ArrayList<VerticesSet> sets, int dim
       //Calculate the ratio of the z from the focus-point-to-camera to focus-point-to-vertex:
       //TODO: Avoid division by zero:
       final float ratioZ = (cameraZ - realFocusZ) /
-        (vertex[DIMENSIONS - 1] - realFocusZ);
+        (vertex[dimensions - 1] - realFocusZ);
       
-      final float[] cameraPoints = newVertex(DIMENSIONS_CAMERA);
-      for (int i = 0 ; i < DIMENSIONS_CAMERA; ++i) {
+      final float[] cameraPoints = newVertex(dimensionsPlane);
+      for (int i = 0 ; i < dimensionsPlane; ++i) {
         final float vertex_pos = vertex[i];
         final float focus_pos = realFocus[i];
         final float projectedPos = focus_pos + (vertex_pos - focus_pos) * ratioZ;
