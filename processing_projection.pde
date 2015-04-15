@@ -1,5 +1,7 @@
 final int DIMENSIONS = 3;
 final int DIMENSIONS_CAMERA = 2;
+final int ROTATION_DIMENSION = 2; //Rotate around this dimension's axis.
+float rotationAngle = 0;
 
 final float CAMERA_SIZE = 800;
 
@@ -147,11 +149,56 @@ void keyPressed()
    case 'L':
      focalLength -= MOVE_STEP;
      break;
+   case 'r':
+   case 'R':
+     rotationAngle -= 0.1 * PI;
+     break;
    default:
      break;
   }
 }
 
+ArrayList<VerticesSet> rotate(final ArrayList<VerticesSet> sets, int dimensions, int rotationDimension) {
+  ArrayList<VerticesSet> result = new ArrayList<VerticesSet>();
+  
+ for (final VerticesSet set : sets) {
+    final VerticesSet setResult = new VerticesSet();
+    setResult.drawingColor = set.drawingColor;
+    result.add(setResult);
+    
+    final ArrayList<float[]> vertices = set.vertices;
+    final ArrayList<float[]> verticesResult = setResult.vertices;
+    
+    //TODO: Generalize this to n dimensions,
+    //though rotation in 4 dimensions would maybe be somehow around a plane rather than around a line.
+    //
+    //Figure out which dimensions' values need to change.
+    //(all dimensions other than the one whose axis we are rotating around):
+    final int[] dimensionsToRotate = new int[2];
+    int dimensionsToRotateIndex = 0;
+    for (int i = 0; i < dimensions; ++i) {
+        if (i != rotationDimension) {
+          dimensionsToRotate[dimensionsToRotateIndex] = i;
+          ++dimensionsToRotateIndex;
+        }
+    }
+      
+    for (float[] vertex : vertices) {  
+      final float val1 = vertex[dimensionsToRotate[0]];
+      final float val2 = vertex[dimensionsToRotate[1]];
+
+      final float[] vertexResult = newVertex(vertex, dimensions);
+      vertexResult[dimensionsToRotate[0]] = val1 * cos(rotationAngle) - val2 * sin(rotationAngle);
+      vertexResult[dimensionsToRotate[1]] = val1 * sin(rotationAngle) + val2 * cos(rotationAngle);
+      
+      verticesResult.add(vertexResult);
+    }
+ }
+ 
+  return result;
+}
+ 
+ 
 ArrayList<VerticesSet> projectToPlane(final ArrayList<VerticesSet> sets, int dimensions, int dimensionsPlane) {
   ArrayList<VerticesSet> result = new ArrayList<VerticesSet>();
   
@@ -198,9 +245,11 @@ void draw() {
   
   frame.setTitle(mouseX + ", " + mouseY);
   
+  final ArrayList<VerticesSet> setsRotated = rotate(sets, DIMENSIONS, ROTATION_DIMENSION);
+  
   //Project it until we are down to 2D:
   //Of course, a real 3D API would do a better job of showing this as soon as it's down to 3D.
-  ArrayList<VerticesSet> setsProjected = sets;
+  ArrayList<VerticesSet> setsProjected = setsRotated;
   for (int dimensions = DIMENSIONS; dimensions > DIMENSIONS_CAMERA; --dimensions) {
     setsProjected = projectToPlane(setsProjected, dimensions, dimensions -1);
   }
