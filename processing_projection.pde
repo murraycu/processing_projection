@@ -1,8 +1,7 @@
 final int DIMENSIONS = 3;
 final int DIMENSIONS_CAMERA = DIMENSIONS - 1;
 
-final float CAMERA_WIDTH = 1000;
-final float CAMERA_HEIGHT = 800;
+final float CAMERA_SIZE = 800;
 
 // Vertices of a cube: x, y, z
 final float EDGE_LENGTH = 200;
@@ -18,7 +17,7 @@ final ArrayList<VerticesSet> sets = new ArrayList<VerticesSet>();
 
 //The top-left corner of the camera, in the z plane:
 final float[] cameraCorner = new float[DIMENSIONS]; //Apparently initialized to 0s.
-final float[] cameraSize = {CAMERA_WIDTH, CAMERA_HEIGHT};
+final float[] cameraSize = new float[DIMENSIONS_CAMERA];
 
 //z distance of focus point behind the camera plane:
 float focalLength = 500; 
@@ -87,11 +86,16 @@ void addCubeSides(final ArrayList<float[]> vertices, final float[] offset, final
 }
 
 void setup() {
-  size((int)CAMERA_WIDTH, (int)CAMERA_HEIGHT);
+  size((int)CAMERA_SIZE, (int)CAMERA_SIZE);
+  
+  for (int i = 0; i < DIMENSIONS_CAMERA; ++i) {
+    cameraSize[i] = CAMERA_SIZE;
+  }
+
   noSmooth();
   
   VerticesSet set = new VerticesSet();
-  final float[] offset1 = {CAMERA_WIDTH / 2 - (EDGE_LENGTH / 2), CAMERA_HEIGHT / 2 - (EDGE_LENGTH / 2), 300};
+  final float[] offset1 = {CAMERA_SIZE / 2 - (EDGE_LENGTH / 2), CAMERA_SIZE / 2 - (EDGE_LENGTH / 2), 300};
   addCubeSides(set.vertices, offset1, EDGE_LENGTH);
   set.drawingColor = color(204, 153, 0);
   sets.add(set);
