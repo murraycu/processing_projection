@@ -5,7 +5,6 @@ float rotationAngle = 0;
 
 final float CAMERA_SIZE = 800;
 
-// Vertices of a cube: x, y, z
 final float EDGE_LENGTH = 200;
 
 final double MOVE_STEP = 5;
