@@ -17,7 +17,7 @@ class VerticesSet {
 final ArrayList<VerticesSet> sets = new ArrayList<VerticesSet>();
 
 //The top-left corner of the camera, in the z plane:
-final float[] cameraCorner = {0, 0, 0};
+final float[] cameraCorner = new float[DIMENSIONS]; //Apparently initialized to 0s.
 final float[] cameraSize = {CAMERA_WIDTH, CAMERA_HEIGHT};
 
 //z distance of focus point behind the camera plane:
@@ -25,7 +25,7 @@ float focalLength = 500;
 
 
 float[] newVertex(float[] offset) {
-  final float[] result = new float[]{0, 0, 0};
+  final float[] result = new float[DIMENSIONS]; //Apparently initialized to 0s.
   arrayCopy(offset, result);
   return result;
 }
