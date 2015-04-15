@@ -17,11 +17,11 @@ class VerticesSet {
 final ArrayList<VerticesSet> sets = new ArrayList<VerticesSet>();
 
 //The top-left corner of the camera, in the z plane:
-final float[] camera_corner = {0, 0, 0};
-final float[] camera_size = {CAMERA_WIDTH, CAMERA_HEIGHT};
+final float[] cameraCorner = {0, 0, 0};
+final float[] cameraSize = {CAMERA_WIDTH, CAMERA_HEIGHT};
 
 //z distance of focus point behind the camera plane:
-float focal_length = 500; 
+float focalLength = 500; 
 
 
 float[] newVertex(float[] offset) {
@@ -32,7 +32,7 @@ float[] newVertex(float[] offset) {
 /**
  * Add opposite squares (cube sides) in the plane of this dimension.
  */
-void add_cube_sides(final ArrayList<float[]> vertices, final float[] offset, final float edge_length, final int dimension)
+void addCubeSides(final ArrayList<float[]> vertices, final float[] offset, final float edgeLength, final int dimension)
 {
   //For instance, draw with x and y values if we are drawing on the z plane:
   int dimension1 = dimension + 1;
@@ -50,7 +50,7 @@ void add_cube_sides(final ArrayList<float[]> vertices, final float[] offset, fin
   for (int i = 0; i < 2; ++i) {
     final float[] offsetSide = new float[DIMENSIONS];
     arrayCopy(offset, offsetSide);
-    final float OFFSET_FROM_PLANE = i * edge_length;
+    final float OFFSET_FROM_PLANE = i * edgeLength;
     offsetSide[dimension] += OFFSET_FROM_PLANE;
     
     float[] vertex = newVertex(offsetSide);
@@ -59,18 +59,18 @@ void add_cube_sides(final ArrayList<float[]> vertices, final float[] offset, fin
     vertices.add(vertex);
   
     vertex = newVertex(offsetSide);
-    vertex[dimension1] += edge_length;
+    vertex[dimension1] += edgeLength;
     vertex[dimension2] += 0;
     vertices.add(vertex);
      
     vertex = newVertex(offsetSide);
-    vertex[dimension1] += edge_length;
-    vertex[dimension2] += edge_length;
+    vertex[dimension1] += edgeLength;
+    vertex[dimension2] += edgeLength;
     vertices.add(vertex);
      
     vertex = newVertex(offsetSide);
     vertex[dimension1] += 0;
-    vertex[dimension2] += edge_length;
+    vertex[dimension2] += edgeLength;
     vertices.add(vertex);
      
     vertex = newVertex(offsetSide);
@@ -80,25 +80,25 @@ void add_cube_sides(final ArrayList<float[]> vertices, final float[] offset, fin
   }
 }
 
-void add_cube_sides(final ArrayList<float[]> vertices, final float[] offset, final float edge_length) {
+void addCubeSides(final ArrayList<float[]> vertices, final float[] offset, final float edgeLength) {
   for (int dimension = 0; dimension < DIMENSIONS; ++dimension) {
-    add_cube_sides(vertices, offset, edge_length, dimension);
+    addCubeSides(vertices, offset, edgeLength, dimension);
   }
 }
-  
+
 void setup() {
   size((int)CAMERA_WIDTH, (int)CAMERA_HEIGHT);
   noSmooth();
   
   VerticesSet set = new VerticesSet();
   final float[] offset1 = {CAMERA_WIDTH / 2 - (EDGE_LENGTH / 2), CAMERA_HEIGHT / 2 - (EDGE_LENGTH / 2), 300};
-  add_cube_sides(set.vertices, offset1, EDGE_LENGTH);
+  addCubeSides(set.vertices, offset1, EDGE_LENGTH);
   set.drawingColor = color(204, 153, 0);
   sets.add(set);
   
   set = new VerticesSet();
   final float[] offset2 = {300, 600, 400};
-  add_cube_sides(set.vertices, offset2, 250);
+  addCubeSides(set.vertices, offset2, 250);
   set.drawingColor = color(50, 55, 100);
   sets.add(set);
 }
@@ -109,32 +109,32 @@ void keyPressed()
   //Remember that the origin is at the top-left, increasing downards and to the right:
   switch(keyCode) {
    case LEFT:
-     camera_corner[0] -= MOVE_STEP;
+     cameraCorner[0] -= MOVE_STEP;
     break;
    case RIGHT:
-     camera_corner[0] += MOVE_STEP;
+     cameraCorner[0] += MOVE_STEP;
      break;
    case UP:
-     camera_corner[1] -= MOVE_STEP;
+     cameraCorner[1] -= MOVE_STEP;
      break;
    case DOWN:
-     camera_corner[1] += MOVE_STEP;
+     cameraCorner[1] += MOVE_STEP;
      break;
    case 'q':
    case 'Q':
-     camera_corner[2]+= MOVE_STEP;
+     cameraCorner[2]+= MOVE_STEP;
      break;
    case 'a':
    case 'A':
-     camera_corner[2] -= MOVE_STEP;
+     cameraCorner[2] -= MOVE_STEP;
      break;
    case 'p':
    case 'P':
-     focal_length += MOVE_STEP;
+     focalLength += MOVE_STEP;
      break;
    case 'l':
    case 'L':
-     focal_length -= MOVE_STEP;
+     focalLength -= MOVE_STEP;
      break;
    default:
      break;
@@ -150,39 +150,38 @@ void draw() {
     stroke(set.drawingColor);
     final ArrayList<float[]> vertices = set.vertices;
     
-    float[] previous_point = null;
+    float[] previousPoint = null;
     //println(" z=" + focus_point[2]);
     
     //The focal point:
-    final float[] real_focus = new float[DIMENSIONS];
+    final float[] realFocus = new float[DIMENSIONS];
     for (int i = 0 ; i < DIMENSIONS_CAMERA; ++i) { 
-      real_focus[i] = camera_corner[i] + (camera_size[i] / 2);
+      realFocus[i] = cameraCorner[i] + (cameraSize[i] / 2);
     }
-    final float camera_z = camera_corner[DIMENSIONS - 1];
-    final float real_focus_z = camera_z - focal_length;
-    real_focus[DIMENSIONS - 1] = real_focus_z;
+    final float cameraZ = cameraCorner[DIMENSIONS - 1];
+    final float realFocusZ = cameraZ - focalLength;
+    realFocus[DIMENSIONS - 1] = realFocusZ;
     
     for (float[] vertex : vertices) {
       //Calculate the ratio of the z from the focus-point-to-camera to focus-point-to-vertex:
       //TODO: Avoid division by zero:
-      final float ratio_z = (camera_z - real_focus_z) /
-        (vertex[DIMENSIONS - 1] - real_focus_z);
-      //println("ratio_z: " + ratio_z);
+      final float ratioZ = (cameraZ - realFocusZ) /
+        (vertex[DIMENSIONS - 1] - realFocusZ);
       
-      final float[] camera_points = new float[DIMENSIONS_CAMERA];
+      final float[] cameraPoints = new float[DIMENSIONS_CAMERA];
       for (int i = 0 ; i < DIMENSIONS_CAMERA; ++i) {
         final float vertex_pos = vertex[i];
-        final float focus_pos = real_focus[i];
-        final float projected_pos = focus_pos + (vertex_pos - focus_pos) * ratio_z;
-        camera_points[i] = projected_pos - camera_corner[i];
+        final float focus_pos = realFocus[i];
+        final float projectedPos = focus_pos + (vertex_pos - focus_pos) * ratioZ;
+        cameraPoints[i] = projectedPos - cameraCorner[i];
       }
       
-      if (previous_point != null) {
-        line(previous_point[0], previous_point[1],
-          camera_points[0], camera_points[1]);
+      if (previousPoint != null) {
+        line(previousPoint[0], previousPoint[1],
+          cameraPoints[0], cameraPoints[1]);
       }
     
-      previous_point = new float[] {camera_points[0], camera_points[1]};
+      previousPoint = new float[] {cameraPoints[0], cameraPoints[1]};
     }
   }
 }
