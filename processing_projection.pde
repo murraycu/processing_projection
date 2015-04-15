@@ -88,7 +88,7 @@ void addCubeSides(final ArrayList<float[]> vertices, final float[] offset, final
   }
 }
 
-void addCubeSides(final ArrayList<float[]> vertices, final float[] offset, final int dimensions, final float edgeLength) {
+void addCube(final ArrayList<float[]> vertices, final float[] offset, final int dimensions, final float edgeLength) {
   for (int dimension = 0; dimension < dimensions; ++dimension) {
     addCubeSides(vertices, offset, dimensions, edgeLength, dimension);
   }
@@ -105,13 +105,13 @@ void setup() {
   
   VerticesSet set = new VerticesSet();
   final float[] offset1 = {CAMERA_SIZE / 2 - (EDGE_LENGTH / 2), CAMERA_SIZE / 2 - (EDGE_LENGTH / 2), 300};
-  addCubeSides(set.vertices, offset1, DIMENSIONS, EDGE_LENGTH);
+  addCube(set.vertices, offset1, DIMENSIONS, EDGE_LENGTH);
   set.drawingColor = color(204, 153, 0);
   sets.add(set);
   
   set = new VerticesSet();
   final float[] offset2 = {300, 600, 400};
-  addCubeSides(set.vertices, offset2, DIMENSIONS, 250);
+  addCube(set.vertices, offset2, DIMENSIONS, 250);
   set.drawingColor = color(50, 55, 100);
   sets.add(set);
 }
