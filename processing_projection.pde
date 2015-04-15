@@ -151,27 +151,27 @@ void keyPressed()
   }
 }
 
-void draw() {
-  background(255);
+ArrayList<VerticesSet> projectToPlane(final ArrayList<VerticesSet> sets, int dimensions, int dimensionsPlane) {
+  ArrayList<VerticesSet> result = new ArrayList<VerticesSet>();
   
-  frame.setTitle(mouseX + ", " + mouseY);
-
+  //The focal point:
+  final float[] realFocus = newVertex(DIMENSIONS);
+  for (int i = 0 ; i < DIMENSIONS_CAMERA; ++i) { 
+    realFocus[i] = cameraCorner[i] + (cameraSize[i] / 2);
+  }
+  final float cameraZ = cameraCorner[DIMENSIONS - 1];
+  final float realFocusZ = cameraZ - focalLength;
+  realFocus[DIMENSIONS - 1] = realFocusZ;
+    
   for (final VerticesSet set : sets) {
+    final VerticesSet setResult = new VerticesSet();
+    setResult.drawingColor = set.drawingColor;
+    result.add(setResult);
+    
     stroke(set.drawingColor);
     final ArrayList<float[]> vertices = set.vertices;
-    
-    float[] previousPoint = null;
-    //println(" z=" + focus_point[2]);
-    
-    //The focal point:
-    final float[] realFocus = newVertex(DIMENSIONS);
-    for (int i = 0 ; i < DIMENSIONS_CAMERA; ++i) { 
-      realFocus[i] = cameraCorner[i] + (cameraSize[i] / 2);
-    }
-    final float cameraZ = cameraCorner[DIMENSIONS - 1];
-    final float realFocusZ = cameraZ - focalLength;
-    realFocus[DIMENSIONS - 1] = realFocusZ;
-    
+    final ArrayList<float[]> verticesResult = setResult.vertices;
+      
     for (float[] vertex : vertices) {
       //Calculate the ratio of the z from the focus-point-to-camera to focus-point-to-vertex:
       //TODO: Avoid division by zero:
@@ -186,12 +186,33 @@ void draw() {
         cameraPoints[i] = projectedPos - cameraCorner[i];
       }
       
+      verticesResult.add(cameraPoints);
+    }
+  }
+  
+  return result;
+}
+
+void draw() {
+  background(255);
+  
+  frame.setTitle(mouseX + ", " + mouseY);
+  
+  final ArrayList<VerticesSet> setProjected = projectToPlane(sets, DIMENSIONS, DIMENSIONS_CAMERA);
+
+  for (final VerticesSet set : setProjected) {
+    stroke(set.drawingColor);
+    
+    float[] previousPoint = null;
+    final ArrayList<float[]> vertices = set.vertices;
+    for (final float[] vertex : vertices) {
+      
       if (previousPoint != null) {
         line(previousPoint[0], previousPoint[1],
-          cameraPoints[0], cameraPoints[1]);
+          vertex[0], vertex[1]);
       }
-
-      previousPoint = cameraPoints;
+      
+      previousPoint = vertex;
     }
   }
 }
