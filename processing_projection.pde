@@ -9,8 +9,12 @@ final float EDGE_LENGTH = 200;
 
 final double MOVE_STEP = 5;
 
+class VerticesSet {
+  public final ArrayList<float[]> vertices = new ArrayList<float[]>();
+  public color drawingColor = 0;
+};
 
-final ArrayList<float[]> vertices = new ArrayList<float[]>();
+final ArrayList<VerticesSet> sets = new ArrayList<VerticesSet>();
 
 //The top-left corner of the camera, in the z plane:
 final float[] camera_corner = {0, 0, 0};
@@ -19,7 +23,6 @@ final float[] camera_size = {CAMERA_WIDTH, CAMERA_HEIGHT};
 //z distance of focus point behind the camera plane:
 float focal_length = 500; 
 
-final float[] OFFSET = {CAMERA_WIDTH / 2 - (EDGE_LENGTH / 2), CAMERA_HEIGHT / 2 - (EDGE_LENGTH / 2), 300};
 
 float[] newVertex(float[] offset) {
   final float[] result = new float[]{0, 0, 0};
@@ -86,8 +89,18 @@ void add_cube_sides(final ArrayList<float[]> vertices, final float[] offset, fin
 void setup() {
   size((int)CAMERA_WIDTH, (int)CAMERA_HEIGHT);
   noSmooth();
- 
-  add_cube_sides(vertices, OFFSET, EDGE_SIZE);
+  
+  VerticesSet set = new VerticesSet();
+  final float[] offset1 = {CAMERA_WIDTH / 2 - (EDGE_LENGTH / 2), CAMERA_HEIGHT / 2 - (EDGE_LENGTH / 2), 300};
+  add_cube_sides(set.vertices, offset1, EDGE_LENGTH);
+  set.drawingColor = color(204, 153, 0);
+  sets.add(set);
+  
+  set = new VerticesSet();
+  final float[] offset2 = {300, 600, 400};
+  add_cube_sides(set.vertices, offset2, 250);
+  set.drawingColor = color(50, 55, 100);
+  sets.add(set);
 }
 
 void keyPressed()
@@ -133,39 +146,44 @@ void draw() {
   
   frame.setTitle(mouseX + ", " + mouseY);
 
-  float[] previous_point = null;
-  //println(" z=" + focus_point[2]);
-  
-  //The focal point:
-  final float[] real_focus = new float[DIMENSIONS];
-  for (int i = 0 ; i < DIMENSIONS_CAMERA; ++i) { 
-    real_focus[i] = camera_corner[i] + (camera_size[i] / 2);
-  }
-  final float camera_z = camera_corner[DIMENSIONS - 1];
-  final float real_focus_z = camera_z - focal_length;
-  real_focus[DIMENSIONS - 1] = real_focus_z;
-  
-  for (float[] vertex : vertices) {
-    //Calculate the ratio of the z from the focus-point-to-camera to focus-point-to-vertex:
-    //TODO: Avoid division by zero:
-    final float ratio_z = (camera_z - real_focus_z) /
-      (vertex[DIMENSIONS - 1] - real_focus_z);
-    //println("ratio_z: " + ratio_z);
+  for (final VerticesSet set : sets) {
+    stroke(set.drawingColor);
+    final ArrayList<float[]> vertices = set.vertices;
     
-    final float[] camera_points = new float[DIMENSIONS_CAMERA];
-    for (int i = 0 ; i < DIMENSIONS_CAMERA; ++i) {
-      final float vertex_pos = vertex[i];
-      final float focus_pos = real_focus[i];
-      final float projected_pos = focus_pos + (vertex_pos - focus_pos) * ratio_z;
-      camera_points[i] = projected_pos - camera_corner[i];
-    }
+    float[] previous_point = null;
+    //println(" z=" + focus_point[2]);
     
-    if (previous_point != null) {
-      line(previous_point[0], previous_point[1],
-        camera_points[0], camera_points[1]);
+    //The focal point:
+    final float[] real_focus = new float[DIMENSIONS];
+    for (int i = 0 ; i < DIMENSIONS_CAMERA; ++i) { 
+      real_focus[i] = camera_corner[i] + (camera_size[i] / 2);
     }
-  
-    previous_point = new float[] {camera_points[0], camera_points[1]};
+    final float camera_z = camera_corner[DIMENSIONS - 1];
+    final float real_focus_z = camera_z - focal_length;
+    real_focus[DIMENSIONS - 1] = real_focus_z;
+    
+    for (float[] vertex : vertices) {
+      //Calculate the ratio of the z from the focus-point-to-camera to focus-point-to-vertex:
+      //TODO: Avoid division by zero:
+      final float ratio_z = (camera_z - real_focus_z) /
+        (vertex[DIMENSIONS - 1] - real_focus_z);
+      //println("ratio_z: " + ratio_z);
+      
+      final float[] camera_points = new float[DIMENSIONS_CAMERA];
+      for (int i = 0 ; i < DIMENSIONS_CAMERA; ++i) {
+        final float vertex_pos = vertex[i];
+        final float focus_pos = real_focus[i];
+        final float projected_pos = focus_pos + (vertex_pos - focus_pos) * ratio_z;
+        camera_points[i] = projected_pos - camera_corner[i];
+      }
+      
+      if (previous_point != null) {
+        line(previous_point[0], previous_point[1],
+          camera_points[0], camera_points[1]);
+      }
+    
+      previous_point = new float[] {camera_points[0], camera_points[1]};
+    }
   }
 }
 
