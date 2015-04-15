@@ -1,5 +1,5 @@
 final int DIMENSIONS = 3;
-final int DIMENSIONS_CAMERA = DIMENSIONS - 1;
+final int DIMENSIONS_CAMERA = 2;
 
 final float CAMERA_SIZE = 800;
 
@@ -199,9 +199,14 @@ void draw() {
   
   frame.setTitle(mouseX + ", " + mouseY);
   
-  final ArrayList<VerticesSet> setProjected = projectToPlane(sets, DIMENSIONS, DIMENSIONS_CAMERA);
+  //Project it until we are down to 2D:
+  //Of course, a real 3D API would do a better job of showing this as soon as it's down to 3D.
+  ArrayList<VerticesSet> setsProjected = sets;
+  for (int dimensions = DIMENSIONS; dimensions > DIMENSIONS_CAMERA; --dimensions) {
+    setsProjected = projectToPlane(setsProjected, dimensions, dimensions -1);
+  }
 
-  for (final VerticesSet set : setProjected) {
+  for (final VerticesSet set : setsProjected) {
     stroke(set.drawingColor);
     
     float[] previousPoint = null;
