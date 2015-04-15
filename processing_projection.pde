@@ -169,7 +169,6 @@ ArrayList<VerticesSet> projectToPlane(final ArrayList<VerticesSet> sets, int dim
     setResult.drawingColor = set.drawingColor;
     result.add(setResult);
     
-    stroke(set.drawingColor);
     final ArrayList<float[]> vertices = set.vertices;
     final ArrayList<float[]> verticesResult = setResult.vertices;
       
