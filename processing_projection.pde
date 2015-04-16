@@ -1,13 +1,35 @@
-final int DIMENSIONS = 3;
+final int DIMENSIONS = 4; // 2 complex numbers (x and y): 1 real and 1 imaginary each).
 final int DIMENSIONS_CAMERA = 2;
 final int ROTATION_DIMENSION = 2; //Rotate around this dimension's axis.
-float rotationAngle = 0;
+float rotationAngle = .2 * PI;
 
 final float CAMERA_SIZE = 800;
 
 final float EDGE_LENGTH = 200;
 
 final double MOVE_STEP = 5;
+
+class Complex {
+  public final double real;
+  public final double i;
+  
+  public Complex(double real, double i) {
+      this.real = real;
+      this.i = i;
+  }
+  
+  public Complex multiply(final Complex b) {
+      final double real = this.real * b.real - this.i * b.i;
+      final double i = this.real * b.i + this.i * b.real;
+      return new Complex(real, i);
+  }
+  
+  public Complex add(final Complex b) {
+      final double real = this.real + b.real;
+      final double i = this.i * b.i;
+      return new Complex(real, i);
+  }
+}
 
 class VerticesSet {
   public final ArrayList<float[]> vertices = new ArrayList<float[]>();
@@ -18,10 +40,11 @@ final ArrayList<VerticesSet> sets = new ArrayList<VerticesSet>();
 
 //The top-left corner of the camera, in the z plane:
 final float[] cameraCorner = newVertex(DIMENSIONS);
+
 final float[] cameraSize = newVertex(DIMENSIONS_CAMERA);
 
 //z distance of focus point behind the camera plane:
-float focalLength = 500; 
+float focalLength = 1000; 
 
 
 float[] newVertex(final float[] offset, final int dimensions) {
@@ -58,16 +81,62 @@ void addAxisLine(final ArrayList<float[]> vertices, final float[] offset, final 
   vertices.add(vertex);
 }
 
-void addQuadraticPlot(final ArrayList<float[]> vertices, final float[] offset, final int dimensions) {
+/**
+ * @param coefficients An array of coefficients, stating with the higher power.
+ * For instance a, b, and c in a * x^2 + b * x^1 + c * x^0.
+ */
+Complex calcQuadratic(final Complex[] coefficients, final Complex x) {
+  Complex result = new Complex(0, 0);
+  
+  int power = coefficients.length - 1;
+  for (final Complex coefficient : coefficients) {
+    Complex val = null;
+    if (power == 0) {
+      val = new Complex(1, 0);
+    } else {
+      val = x;
+      for (int i = 1 ; i < power; i++) {
+        val = val.multiply(val);
+      }
+    }
+    
+    val = val.multiply(coefficient);
+    
+    result = result.add(val);
+    
+    --power;
+  }
+  
+  return result;
+}
+
+void addQuadraticPlot(final ArrayList<VerticesSet> sets, final float[] offset, final int dimensions) {
+  final Complex[] coefficients = new Complex[3];
+  coefficients[0] = new Complex (-0.02, 0);
+  coefficients[1] = new Complex (-0.02, 0);
+  coefficients[2] = new Complex (-10, 0);
+
+
   final float MIN = -100;
   final float MAX = 100;
-  for(float x = MIN; x <= MAX; x += 1) {
-    final float y = 5 * pow(x, 2) + 30 * x;
+  for(float realX = MIN; realX <= MAX; realX += 1) {
+    
+    VerticesSet set = new VerticesSet();
+    set.drawingColor = color(204, 153, 0, 50);
+    sets.add(set);
+    final ArrayList<float[]> vertices = set.vertices;
   
-    final float[] vertex = newVertex(offset, dimensions);
-    vertex[0] += x;
-    vertex[1] += y;
-    vertices.add(vertex);
+    for (float iX = MIN; iX < MAX; iX +=1) {
+      final Complex x = new Complex(realX, iX);
+      final Complex y = calcQuadratic(coefficients, x);
+      
+      final float[] vertex = newVertex(offset, dimensions);
+      vertex[0] += x.real;
+      vertex[1] += y.real;
+      vertex[2] += x.i;
+      vertex[3] += y.i;
+      vertices.add(vertex);
+    }
   }
 }
 
@@ -132,19 +201,20 @@ void addCube(final ArrayList<float[]> vertices, final float[] offset, final int 
 void setup() {
   size((int)CAMERA_SIZE, (int)CAMERA_SIZE);
   
+  cameraCorner[0] = -(CAMERA_SIZE / 2);
+  cameraCorner[1] = -(CAMERA_SIZE / 2);
+
   for (int i = 0; i < DIMENSIONS_CAMERA; ++i) {
     cameraSize[i] = CAMERA_SIZE;
   }
 
   noSmooth();
   
-  final float[] offset = {CAMERA_SIZE / 2 - (EDGE_LENGTH / 2), CAMERA_SIZE / 2 - (EDGE_LENGTH / 2), 300};
+  final float[] offset = newVertex(DIMENSIONS); //{CAMERA_SIZE / 2 - (EDGE_LENGTH / 2), CAMERA_SIZE / 2 - (EDGE_LENGTH / 2), 300};
   addAxesLines(sets, offset, DIMENSIONS);
   
-  VerticesSet set = new VerticesSet();
-  addQuadraticPlot(set.vertices, offset, DIMENSIONS);
-  set.drawingColor = color(204, 153, 0);
-  sets.add(set);
+  addQuadraticPlot(sets, offset, DIMENSIONS);
+
   
   /*
   VerticesSet set = new VerticesSet();
@@ -196,7 +266,7 @@ void keyPressed()
      break;
    case 'r':
    case 'R':
-     rotationAngle -= 0.1 * PI;
+     rotationAngle -= 0.01 * PI;
      break;
    default:
      break;
@@ -290,7 +360,7 @@ void draw() {
   
   frame.setTitle(mouseX + ", " + mouseY);
   
-  final ArrayList<VerticesSet> setsRotated = rotate(sets, DIMENSIONS, ROTATION_DIMENSION);
+  final ArrayList<VerticesSet> setsRotated = sets; //rotate(sets, DIMENSIONS, ROTATION_DIMENSION);
   
   //Project it until we are down to 2D:
   //Of course, a real 3D API would do a better job of showing this as soon as it's down to 3D.
@@ -300,12 +370,14 @@ void draw() {
   }
 
   for (final VerticesSet set : setsProjected) {
+    //strokeWeight(0.001);
     stroke(set.drawingColor);
     
     float[] previousPoint = null;
     final ArrayList<float[]> vertices = set.vertices;
     for (final float[] vertex : vertices) {
-      
+      //point(vertex[0], vertex[1]);
+    
       if (previousPoint != null) {
         line(previousPoint[0], previousPoint[1],
           vertex[0], vertex[1]);
