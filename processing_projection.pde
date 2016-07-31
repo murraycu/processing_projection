@@ -198,8 +198,11 @@ void addCube(final ArrayList<float[]> vertices, final float[] offset, final int 
   }
 }
 
-void setup() {
+void settings() {
   size((int)CAMERA_SIZE, (int)CAMERA_SIZE);
+}
+
+void setup() {
   
   cameraCorner[0] = -(CAMERA_SIZE / 2);
   cameraCorner[1] = -(CAMERA_SIZE / 2);
@@ -358,7 +361,7 @@ ArrayList<VerticesSet> projectToPlane(final ArrayList<VerticesSet> sets, int dim
 void draw() {
   background(255);
   
-  frame.setTitle(mouseX + ", " + mouseY);
+  surface.setTitle(mouseX + ", " + mouseY);
   
   final ArrayList<VerticesSet> setsRotated = sets; //rotate(sets, DIMENSIONS, ROTATION_DIMENSION);
   
@@ -387,7 +390,3 @@ void draw() {
     }
   }
 }
-
-
-
-
